@@ -14,6 +14,7 @@ scope = [
 creds = ServiceAccountCredentials.from_json_keyfile_name(
     "mypython-441415-8a9b22688418.json", scope
 )
+
 client = gspread.authorize(creds)
 spreadsheet_id = "1-ZwYgQAglAIomCahGYBnwX5PCbFL7a7CqScTA-em7Qk"
 spreadsheet = client.open_by_key(spreadsheet_id)
@@ -36,7 +37,8 @@ def determine_column_type(column):
     if pd.api.types.is_numeric_dtype(column):
         return "int" if pd.api.types.is_integer_dtype(column) else "float"
     elif unique_values / total_values < 0.2:  # Если менее 20% уникальных значений
-        return "ENUM"
+        options = column.unique().tolist()
+        return {"type": "ENUM", "options": options}
     else:
         return "string"
 
