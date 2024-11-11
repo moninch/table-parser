@@ -4,7 +4,6 @@ import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-from app.api.schemas import SearchQuery
 
 scope = [
     "https://spreadsheets.google.com/feeds",
