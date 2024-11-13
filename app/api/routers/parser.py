@@ -3,8 +3,6 @@ from typing import Dict, Optional, Union
 from app.api.dependencies import get_columns_info
 from app.api.google_sheet_auth import get_google_sheets_client, fetch_sheet_data
 import pandas as pd
-import os
-import asyncio
 from app.settings import SETTINGS
 
 client = get_google_sheets_client(SETTINGS.CREDENTIALS_FILE)
