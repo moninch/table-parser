@@ -16,8 +16,8 @@ def get_google_sheets_client(credentials_file: str):
 
 @cached(ttl=60)
 async def fetch_sheet_data(client_manager, spreadsheet_id: str):
-    async with client_manager as client:
-        spreadsheet = await client.open_by_key(spreadsheet_id)
-        worksheet = await spreadsheet.get_worksheet(0)  # выбор листа
-        records = await worksheet.get_all_records()
+    client = await client_manager.authorize()
+    spreadsheet = await client.open_by_key(spreadsheet_id)
+    worksheet = await spreadsheet.get_worksheet(0)  # выбор листа
+    records = await worksheet.get_all_records()
     return records
