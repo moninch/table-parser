@@ -44,6 +44,6 @@ async def search_data(query: Dict[str, Optional[str]]):
 
     for key, value in query.items():
         if key in df.columns and value:
-            df = df[df[key].str.contains(value, case=False, na=False)]
+            df = df[df[key].astype(str).str.contains(str(value), case=False, na=False)]
 
     return df.to_dict(orient="records")
