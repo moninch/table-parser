@@ -16,8 +16,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    logging.warning("Starting bot")
     loop = asyncio.new_event_loop()
     loop.create_task(main())
     loop.run_forever()
-    logging.warning("Bot stopped")
