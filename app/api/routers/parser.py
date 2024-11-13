@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from app.api.dependencies import get_columns_info
 from app.api.google_sheet_auth import get_google_sheets_client, fetch_sheet_data
 import pandas as pd
@@ -51,7 +51,7 @@ async def get_column_data(
 
 
 @router.post("/search")
-async def search_data(query: Dict[str, Optional[str]]):
+async def search_data(query: Dict[str, Union[str, int, float]]):
     """
     Эндпоинт для поиска данных по заданным критериям.
 
