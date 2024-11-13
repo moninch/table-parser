@@ -1,5 +1,4 @@
-import logging
-from fastapi import APIRouter, BackgroundTasks
+from fastapi import APIRouter
 
 from starlette.responses import JSONResponse
 

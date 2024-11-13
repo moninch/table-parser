@@ -1,19 +1,7 @@
 import asyncio
 import logging
-from fastapi import BackgroundTasks
-import pandas as pd
 import uvicorn
-
-# import app.loggers.logger as logger
-
-# from aiohttp import web
-# from aiogram import Bot, Dispatcher
-# from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
-
 from app.settings import SETTINGS
-
-# from app.utils.mongodb import MongoDB
-# from motor.motor_asyncio import AsyncIOMotorClient
 
 
 async def main():
