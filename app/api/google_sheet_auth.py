@@ -23,5 +23,7 @@ async def fetch_sheet_data(client_manager, spreadsheet_id: str):
         worksheet = await spreadsheet.get_worksheet(0)  # выбор листа
         records = await worksheet.get_all_records()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500, detail="Нет доступа к данной Google таблице"
+        )
     return records
