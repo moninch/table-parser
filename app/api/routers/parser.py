@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
-from typing import Dict, Optional, Union
+from typing import Dict, Union
 from app.api.dependencies import get_columns_info
 from app.api.google_sheet_auth import get_google_sheets_client, fetch_sheet_data
 import pandas as pd
@@ -60,10 +60,23 @@ async def search_data(query: Dict[str, Union[str, int, float]]):
     Возвращает записи, соответствующие условиям поиска.
     """
     data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
+
     df = pd.DataFrame(data)
 
     for key, value in query.items():
-        if isinstance(value, int) or isinstance(value, float):
+        if key == "Стоимость" and "-" in value:
+            value = value.split("-")
+            cost_from = int(value[0])
+            cost_to = int(value[1])
+            if cost_from is None:
+                cost_from = 0
+            if cost_from > cost_to:
+                raise HTTPException(
+                    status_code=400, detail="Cost from must be less than cost to"
+                )
+            df = df[(df["Стоимость"] >= cost_from) & (df["Стоимость"] <= cost_to)]
+
+        elif isinstance(value, int) or isinstance(value, float):
             df = df[df[key] == value]
         else:
             df = df[df[key].astype(str).str.contains(value, case=False, na=False)]
