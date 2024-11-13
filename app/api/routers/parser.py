@@ -64,12 +64,20 @@ async def search_data(query: Dict[str, Union[str, int, float]]):
     df = pd.DataFrame(data)
 
     for key, value in query.items():
+
         if key == "Стоимость" and "-" in value:
             value = value.split("-")
-            cost_from = int(value[0])
-            cost_to = int(value[1])
-            if cost_from is None:
+
+            cost_from, cost_to = value[0], value[1]
+
+            if cost_from == "":
                 cost_from = 0
+            elif cost_to == "":
+                cost_to = 10000000
+
+            cost_to = int(cost_to)
+            cost_from = int(cost_from)
+
             if cost_from > cost_to:
                 raise HTTPException(
                     status_code=400, detail="Cost from must be less than cost to"
