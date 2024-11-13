@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Dict, Optional
 from app.api.dependencies import get_columns_info
-from app.api.auth import get_google_sheets_client, fetch_sheet_data
+from app.api.google_sheet_auth import get_google_sheets_client, fetch_sheet_data
 import pandas as pd
 import os
 import asyncio
