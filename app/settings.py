@@ -1,5 +1,5 @@
 from os import environ, getenv
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel
 from dotenv import load_dotenv
 
 load_dotenv(".env")
