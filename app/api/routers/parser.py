@@ -15,6 +15,10 @@ router = APIRouter(
 
 @router.get("/columns")
 async def get_columns():
+    """
+    Эндпоинт для получения информации о всех столбцах в таблице.
+    Загружает данные из Google Sheets и возвращает информацию по каждому столбцу.
+    """
     data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
     columns_info = get_columns_info(data)
     return columns_info
@@ -25,6 +29,15 @@ async def get_column_data(
     column_name: str,
     unique: bool = Query(False, description="Получить только уникальные значения"),
 ):
+    """
+    Эндпоинт для получения данных из конкретного столбца по его названию.
+
+    Параметры:
+    - column_name (str): Название столбца, данные которого нужно получить.
+    - unique (bool): Если True, возвращаются только уникальные значения столбца.
+
+    Возвращает данные указанного столбца или выбрасывает ошибку 404, если столбец не найден.
+    """
     data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
     df = pd.DataFrame(data)
 
@@ -39,6 +52,15 @@ async def get_column_data(
 
 @router.post("/search")
 async def search_data(query: Dict[str, Optional[str]]):
+    """
+    Эндпоинт для поиска данных по заданным критериям.
+
+    Параметры:
+    - query (Dict[str, Optional[str]]): Словарь, где ключ — название столбца,
+      а значение — искомое значение. Поддерживается частичный поиск по строке.
+
+    Возвращает записи, соответствующие условиям поиска.
+    """
     data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
     df = pd.DataFrame(data)
 
