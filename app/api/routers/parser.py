@@ -1,76 +1,49 @@
-from typing import Dict, Optional
 from fastapi import APIRouter, HTTPException, Query
+from typing import Dict, Optional
+from app.api.dependencies import get_columns_info
+from app.api.auth import get_google_sheets_client, fetch_sheet_data
 import pandas as pd
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+import os
+import asyncio
+from app.settings import SETTINGS
 
-
-scope = [
-    "https://spreadsheets.google.com/feeds",
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
-]
-creds = ServiceAccountCredentials.from_json_keyfile_name(
-    "mypython-441415-8a9b22688418.json", scope
-)
-
-client = gspread.authorize(creds)
-spreadsheet_id = "1-ZwYgQAglAIomCahGYBnwX5PCbFL7a7CqScTA-em7Qk"
-spreadsheet = client.open_by_key(spreadsheet_id)
-sheet = spreadsheet.sheet1
-data = sheet.get_all_records()
-data = pd.DataFrame(data)
-
+client = get_google_sheets_client(SETTINGS.CREDENTIALS_FILE)
 router = APIRouter(
-    prefix="/parser",
-    tags=["parser"],
-    responses={404: {"description": "Not found"}},
+    prefix="/parser", tags=["parser"], responses={404: {"description": "Not found"}}
 )
-
-
-def determine_column_type(column):
-    unique_values = column.nunique()
-    total_values = len(column)
-    dtype = str(column.dtype)
-
-    if pd.api.types.is_numeric_dtype(column):
-        return "int" if pd.api.types.is_integer_dtype(column) else "float"
-    elif unique_values / total_values < 0.2:  # Если менее 20% уникальных значений
-        options = column.unique().tolist()
-        return {"type": "ENUM", "options": options}
-    else:
-        return "string"
 
 
 @router.get("/columns")
-def get_columns():
-    columns_info = {col: determine_column_type(data[col]) for col in data.columns}
+async def get_columns():
+    data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
+    columns_info = get_columns_info(data)
     return columns_info
 
 
 @router.get("/column/{column_name}")
-def get_column_data(
+async def get_column_data(
     column_name: str,
     unique: bool = Query(False, description="Получить только уникальные значения"),
 ):
+    data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
+    df = pd.DataFrame(data)
 
-    if column_name not in data.columns:
+    if column_name not in df.columns:
         raise HTTPException(status_code=404, detail="Column not found")
 
     column_data = (
-        data[column_name].unique().tolist() if unique else data[column_name].tolist()
+        df[column_name].unique().tolist() if unique else df[column_name].tolist()
     )
     return column_data
 
 
 @router.post("/search")
-def search_data(query: Dict[str, Optional[str]]):
-    filtered_data = data.copy()
+async def search_data(query: Dict[str, Optional[str]]):
+    data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
+    df = pd.DataFrame(data)
 
     for key, value in query.items():
-        if key in filtered_data.columns and value:
-            filtered_data = filtered_data[
-                filtered_data[key].str.contains(value, case=False, na=False)
-            ]
+        if key in df.columns and value:
+            df = df[df[key].str.contains(value, case=False, na=False)]
 
-    return filtered_data.to_dict(orient="records")
+    return df.to_dict(orient="records")
