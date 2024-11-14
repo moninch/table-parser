@@ -1,4 +1,6 @@
+from numpy import float64, int64
 import pandas as pd
+from fastapi import HTTPException
 
 
 def determine_column_type(column):
@@ -15,6 +17,37 @@ def determine_column_type(column):
         return "string"
 
 
-def get_columns_info(data):
-    df = pd.DataFrame(data)
+def get_columns_info(df):
     return {col: determine_column_type(df[col]) for col in df.columns}
+
+
+def validate_data(data):
+    df = pd.DataFrame(data)
+    for column in df.columns:
+        if df[column].dtype == object:
+            if df[column].isnull().any():
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Столбец '{column}' содержит пустые значения",
+                )
+
+            if df[column].astype(str).str.contains(r"^\d+$").any():
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Столбец '{column}' содержит целочисленные значения",
+                )
+
+        elif df[column].dtype == int64:
+            if df[column].min() <= 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Столбец '{column}' содержит значения вне диапазона",
+                )
+        elif df[column].dtype == float64:
+            if df[column].min() <= 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Столбец '{column}' содержит значения вне диапазона",
+                )
+    df["Для кого"] = df["Для кого"].replace("", "Взрослый")
+    return df

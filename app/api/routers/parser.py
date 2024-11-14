@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Query
 from typing import Dict, Union
-from app.api.dependencies import get_columns_info
+from app.api.dependencies import get_columns_info, validate_data
 from app.api.google_sheet_auth import get_google_sheets_client, fetch_sheet_data
 import pandas as pd
 from app.settings import SETTINGS
@@ -17,8 +17,10 @@ async def get_columns():
     Эндпоинт для получения информации о всех столбцах в таблице.
     Загружает данные из Google Sheets и возвращает информацию по каждому столбцу.
     """
+
     data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
-    columns_info = get_columns_info(data)
+    df = validate_data(data)
+    columns_info = get_columns_info(df)
     return columns_info
 
 
@@ -37,7 +39,7 @@ async def get_column_data(
     Возвращает данные указанного столбца или выбрасывает ошибку 404, если столбец не найден.
     """
     data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
-    df = pd.DataFrame(data)
+    df = validate_data(data)
 
     if column_name not in df.columns:
         raise HTTPException(status_code=404, detail="Column not found")
@@ -61,7 +63,7 @@ async def search_data(query: Dict[str, Union[str, int, float]]):
     """
     data = await fetch_sheet_data(client, SETTINGS.SPREADSHEET_ID)
 
-    df = pd.DataFrame(data)
+    df = validate_data(data)
 
     for key, value in query.items():
 
