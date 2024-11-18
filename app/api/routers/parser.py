@@ -75,7 +75,7 @@ async def search_data(query: Dict[str, Union[str, int, float]]):
             if cost_from == "":
                 cost_from = 0
             elif cost_to == "":
-                cost_to = 10000000
+                cost_to = df["Стоимость"].max()
 
             cost_to = int(cost_to)
             cost_from = int(cost_from)
