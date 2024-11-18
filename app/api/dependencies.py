@@ -37,17 +37,23 @@ def validate_data(data):
                     detail=f"Столбец '{column}' содержит целочисленные значения",
                 )
 
-        elif df[column].dtype == int64:
-            if df[column].min() <= 0:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Столбец '{column}' содержит значения вне диапазона",
-                )
-        elif df[column].dtype == float64:
-            if df[column].min() <= 0:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Столбец '{column}' содержит значения вне диапазона",
-                )
+        # elif df[column].dtype == int64:
+        #     if df[column].min() <= 0:
+        #         raise HTTPException(
+        #             status_code=400,
+        #             detail=f"Столбец '{column}' содержит значения вне диапазона",
+        #         )
+        # elif df[column].dtype == float64:
+        #     if df[column].min() <= 0:
+        #         raise HTTPException(
+        #             status_code=400,
+        #             detail=f"Столбец '{column}' содержит значения вне диапазона",
+        # )
+    if df["Стоимость"].min() < 0:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Столбец 'Стоимость' содержит значения вне диапазона(<0)",
+        )
+
     df["Для кого"] = df["Для кого"].replace("", "Взрослый")
     return df
