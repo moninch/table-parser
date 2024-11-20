@@ -23,14 +23,6 @@ def get_columns_info(df):
 
 def validate_data(data):
     df = pd.DataFrame(data)
-    for column in df.columns:
-        if df[column].dtype == object:
-            if df[column].astype(str).str.contains(r"^\d+$").any():
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Столбец '{column}' содержит целочисленные значения",
-                )
-
     if (df == "").values.any():
         raise HTTPException(
             status_code=400,
@@ -42,4 +34,11 @@ def validate_data(data):
             status_code=400,
             detail=f"Столбец 'Стоимость' содержит значения вне диапазона(<0)",
         )
+    for column in df.columns:
+        if df[column].dtype == object:
+            if df[column].astype(str).str.contains(r"^\d+$").any():
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Столбец '{column}' содержит целочисленные значения",
+                )
     return df
